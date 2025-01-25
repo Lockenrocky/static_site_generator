@@ -1,0 +1,4 @@
+0000000000000000000000000000000000000000 9ec07dbeed5ab23e9e01e41cfca1a15011b10945 Lockenrocky <steffenbengt@hotmail.com> 1737414786 +0100	commit (initial): Project setup
+9ec07dbeed5ab23e9e01e41cfca1a15011b10945 7ec632b616ddf0cff4a0dfceeba0eeacf7fbaa1d Lockenrocky <steffenbengt@hotmail.com> 1737414856 +0100	commit: Setup
+7ec632b616ddf0cff4a0dfceeba0eeacf7fbaa1d 87edd619ad82775da772b952dc6b966e278b8026 Lockenrocky <steffenbengt@hotmail.com> 1737417287 +0100	commit: added src folder containig main.py and textnode.py. Also added a script file to run main.py
+87edd619ad82775da772b952dc6b966e278b8026 771adfe4af605bb0eebcb1a61e9e0d458b8953ae Lockenrocky <steffenbengt@hotmail.com> 1737498624 +0100	commit: adding unittest
