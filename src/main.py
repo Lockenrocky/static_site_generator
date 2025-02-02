@@ -1,5 +1,41 @@
 from textnode import *
 import os, shutil
+from block_markdown import *
+
+def extract_title(markdown):
+    lines = markdown_to_blocks(markdown)
+    for line in lines:
+        if line.startswith("# "):
+            return line.strip("# ")
+    raise Exception("No h1 found in markdown")
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    md = open(from_path)
+    html_text = md.read()
+    md.close()
+    title = extract_title(html_text)
+    html_text = markdown_to_html_node(html_text)
+    template_md = open(template_path, mode="r")
+    template = template_md.read()
+    template = template.replace("{{ Title }}", title).replace("{{ Content }}", html_text)
+    template_md.close()
+    file_name = from_path.split("/")[-1].replace(".md",".html")
+    file_path = dest_path + "/" + file_name
+    with open(file_path, "w") as file:
+        file.write(template)
+    return
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    
+    for filename in os.listdir(dir_path_content):
+        file_path = os.path.join(dir_path_content, filename)
+        if os.path.isfile(file_path):
+            generate_page(file_path, template_path, dest_dir_path)
+        elif os.path.isdir(file_path):
+            dir_path = os.path.join(dest_dir_path, filename)
+            os.mkdir(dir_path)
+            generate_pages_recursive(file_path, template_path, dir_path)
 
 def clear_directory(path):
     folder = path
@@ -13,27 +49,25 @@ def clear_directory(path):
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
 
-def copy_from_source_to_destination():
+def copy_from_source_to_destination(src_path, des_path):
     # delete every file inside the public folder 
-    des_path = "/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/public"
     if len(os.listdir(des_path)) > 0:
         clear_directory(des_path)
     # recursivly copy all files and subdirectories, nested files, etc.
-    folder = "/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/static"
-    for filename in os.listdir(folder):
-        file_path = os.path.join(folder, filename)
-        try:
-            if os.path.isfile(file_path):
-                shutil.copy(file_path, des_path)
-                print(f"copied file from {file_path} to {des_path}")
-            elif os.path.isdir(file_path):
-                folder = file_path
-                copy_from_source_to_destination()
-        except Exception as e:
-            print(f"error: {e}")
-
+    for filename in os.listdir(src_path):
+        file_path = os.path.join(src_path, filename)
+        if os.path.isfile(file_path):
+            shutil.copy(file_path, des_path)
+        elif os.path.isdir(file_path):
+            dir_path = os.path.join(des_path, filename)
+            os.mkdir(dir_path)
+            copy_from_source_to_destination(file_path,dir_path)
 
 def main():
-    copy_from_source_to_destination()
+    copy_from_source_to_destination("/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/static", 
+                                    "/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/public")
+    generate_pages_recursive("/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/content",
+                  "/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/template.html",
+                  "/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/public/")
     
 main()   
