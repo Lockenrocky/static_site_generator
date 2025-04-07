@@ -1,3 +1,4 @@
+import sys
 from textnode import *
 import os, shutil
 from block_markdown import *
@@ -9,7 +10,8 @@ def extract_title(markdown):
             return line.strip("# ")
     raise Exception("No h1 found in markdown")
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, BASEPATH):
+    bp = BASEPATH
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     md = open(from_path)
     html_text = md.read()
@@ -19,6 +21,7 @@ def generate_page(from_path, template_path, dest_path):
     template_md = open(template_path, mode="r")
     template = template_md.read()
     template = template.replace("{{ Title }}", title).replace("{{ Content }}", html_text)
+    template = template.replace('href="/', 'href="' + bp).replace('src="/', 'src="' + bp)
     template_md.close()
     file_name = from_path.split("/")[-1].replace(".md",".html")
     file_path = dest_path + "/" + file_name
@@ -26,16 +29,16 @@ def generate_page(from_path, template_path, dest_path):
         file.write(template)
     return
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     
     for filename in os.listdir(dir_path_content):
         file_path = os.path.join(dir_path_content, filename)
         if os.path.isfile(file_path):
-            generate_page(file_path, template_path, dest_dir_path)
+            generate_page(file_path, template_path, dest_dir_path, basepath)
         elif os.path.isdir(file_path):
             dir_path = os.path.join(dest_dir_path, filename)
             os.mkdir(dir_path)
-            generate_pages_recursive(file_path, template_path, dir_path)
+            generate_pages_recursive(file_path, template_path, dir_path, basepath)
 
 def clear_directory(path):
     folder = path
@@ -64,10 +67,18 @@ def copy_from_source_to_destination(src_path, des_path):
             copy_from_source_to_destination(file_path,dir_path)
 
 def main():
-    copy_from_source_to_destination("/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/static", 
-                                    "/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/public")
-    generate_pages_recursive("/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/content",
-                  "/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/template.html",
-                  "/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/public/")
+    if len(sys.argv) > 1:
+        basepath = sys.argv[1]
+    else:
+        basepath = "/"
+    
+    copy_from_source_to_destination("static", "docs")
+    generate_pages_recursive("content", "template.html", "docs/", basepath)
+
+    #copy_from_source_to_destination("/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/static", 
+    #                                "/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/public")
+    #generate_pages_recursive("/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/content",
+    #              "/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/template.html",
+    #              "/home/lockenrocky/workspace/github.com/Lockenrocky/static_site_generator/public/")
     
 main()   
