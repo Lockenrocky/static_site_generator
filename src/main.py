@@ -11,7 +11,6 @@ def extract_title(markdown):
     raise Exception("No h1 found in markdown")
 
 def generate_page(from_path, template_path, dest_path, BASEPATH):
-    bp = BASEPATH
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
     md = open(from_path)
     html_text = md.read()
@@ -21,7 +20,7 @@ def generate_page(from_path, template_path, dest_path, BASEPATH):
     template_md = open(template_path, mode="r")
     template = template_md.read()
     template = template.replace("{{ Title }}", title).replace("{{ Content }}", html_text)
-    template = template.replace('href="/', 'href="' + bp).replace('src="/', 'src="' + bp)
+    template = template.replace('href="/', f'href="{BASEPATH}').replace('src="/', f'src="{BASEPATH}')
     template_md.close()
     file_name = from_path.split("/")[-1].replace(".md",".html")
     file_path = dest_path + "/" + file_name
